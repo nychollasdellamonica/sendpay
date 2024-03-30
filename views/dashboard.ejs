@@ -1,0 +1,234 @@
+<!-- report.ejs -->
+<%- include('partials/header') %>
+
+    <div class="container py-5">
+        <h1 class="mb-4">Dashboard</h1>
+
+        <!-- Button to open modal for adding new data -->
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addModal" onclick="setInsertUpdateValue('insert')">
+            Add New Data
+        </button>
+
+        <!-- Report section -->
+        <h2>Report</h2>
+        <!-- Placeholder code for the report section -->
+        <!-- Placeholder code for the report section -->
+        <div id="report">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Money Code</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Symbol</th>
+                        <th scope="col">Timestamp</th>
+                        <th scope="col">Number of Rates</th>
+                        <!-- Add more columns as needed -->
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Loop through the data and populate the table rows -->
+                    <% currencies.forEach(currency=> { %>
+                        <tr>
+                            <td>
+                                <%= currency.moneyCode %>
+                            </td>
+                            <td>
+                                <%= currency.description %>
+                            </td>
+                            <td>
+                                <%= currency.symbol %>
+                            </td>
+                            <td>
+                                <%= currency.timestamp %>
+                            </td>
+                            <td>
+                                <%= currency.numerberOfRates %>
+                            </td>
+                            <!-- Add more columns as needed -->
+                            <td>
+                                <!-- Buttons for actions (e.g., edit, delete) -->
+                                <button class="btn btn-sm btn-info"
+                                    onclick="viewRates('<%= currency.moneyCode %>')">View Rates</button>
+                                <button class="btn btn-sm btn-primary"
+                                    onclick="editData('<%= currency.moneyCode %>')">Edit</button>
+                                <button class="btn btn-sm btn-danger"
+                                    onclick="deleteData('<%= currency.moneyCode %>')">Delete</button>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <div class="modal fade" id="ratesModal" tabindex="-1" aria-labelledby="ratesModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ratesModalLabel">Rates</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Container to display rates -->
+                        <div id="ratesContainer"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Add/Edit Modal -->
+        <!-- Add/Edit Modal -->
+        <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addModalLabel">Edit Data</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Form for adding/editing data -->
+                        <form id="editForm" action="/insertUpdateMoney" method="post">
+                            <input type="hidden" id="controlInsertUpdate" name="hiddenField" value="">
+                            <div class="mb-3">
+                                <label for="moneyCode" class="form-label">Money Code</label>
+                                <input type="text" class="form-control" id="moneyCode" name="moneyCode" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <input type="text" class="form-control" id="description" name="description" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="symbol" class="form-label">Symbol</label>
+                                <input type="text" class="form-control" id="symbol" name="symbol" required>
+                            </div>
+                            <!-- Dynamic input fields for currency rates -->
+                            <div id="currencyRates">
+                                <!-- Initially one input field for currency rate -->
+                                <div class="mb-3 currency-rate">
+                                    <label for="rate1" class="form-label">Rate 1</label>
+                                    <input type="text" class="form-control" id="rate1" name="rates[0][moneyCode]"
+                                        placeholder="Money Code" required>
+                                    <input type="text" class="form-control mt-2" id="rateValue1" name="rates[0][rate]"
+                                        placeholder="Rate" required>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-primary" id="addCurrencyRate">Add Rate</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Include jQuery (required for AJAX) -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <!-- Include Bootstrap JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+
+        <!-- JavaScript code to handle CRUD operations and update report data -->
+        <script>
+
+function editData(moneyCode) {
+    $.get('/getMoneyByID/' + moneyCode)
+        .done(function (data) {
+            document.getElementById('moneyCode').value = data.moneyCode;
+            document.getElementById('description').value = data.description;
+            document.getElementById('symbol').value = data.symbol;
+            var currencyRateCount = 1;
+            console.log(data);
+            for (let x = 0; x < data.rates.length; x++) {
+                if (x > 0) {
+                    var newCurrencyRateField = `
+                        <div class="mb-3 currency-rate">
+                            <label for="rate${currencyRateCount}" class="form-label">Rate ${currencyRateCount}</label>
+                            <input type="text" class="form-control" id="rate${currencyRateCount}" name="rates[${currencyRateCount - 1}][moneyCode]" placeholder="Money Code" required>
+                            <input type="text" class="form-control mt-2" id="rateValue${currencyRateCount}" name="rates[${currencyRateCount - 1}][rate]" placeholder="Rate" required>
+                        </div>
+                    `;
+                    $('#currencyRates').append(newCurrencyRateField);
+                    currencyRateCount++;
+                }
+                document.getElementById(`rateValue${x+1}`).value = data.rates[x].rate;
+                document.getElementById(`rate${x+1}`).value = data.rates[x].moneyCode;
+            }
+             setInsertUpdateValue('update')
+            $('#addModal').modal('show');
+        });
+}
+
+            // Function to handle deleting data
+            function deleteData(moneyCode) {
+                // Send a DELETE request to the server
+                $.ajax({
+                    url: `/deleteMoney/${moneyCode}`,
+                    type: 'DELETE',
+                    success: function (result) {
+                        // Reload the page or update the report section as needed
+                        location.reload();
+                    },
+                    error: function (error) {
+                        console.error('Failed to delete data');
+                    }
+                });
+            }
+
+            // Call fetchReportData function when the page loads to initially populate the report
+            $(document).ready(function () {
+                fetchReportData();
+            });
+        </script>
+
+
+        <script>
+            function viewRates(moneyCode) {
+                // Make an AJAX request to fetch the rates for the selected currency
+                $.get(`getMoneyRates/${moneyCode}`)
+                    .done(function (data) {
+                        // Open the rates modal
+                        $('#ratesModal').modal('show');
+                        if (Array.isArray(data) && data.length > 0) {
+                            // Display rates in the modal body
+                            const ratesHtml = data.map(rate => `<li>${rate.moneyCode}: ${rate.rate}</li>`).join('');
+                            $('#ratesContainer').html(`
+                        <h5>Rates for ${moneyCode}</h5>
+                        <ul>${ratesHtml}</ul>
+                    `);
+                        } else {
+                            // If no rates are available, display a message
+                            $('#ratesContainer').html('<p>No rates available for this currency.</p>');
+                        }
+                    })
+                    .fail(function () {
+                        console.error('Failed to fetch rates');
+                    });
+            }
+
+            // JavaScript code to handle dynamic addition of currency rate input fields
+            $(document).ready(function () {
+                // Counter for currency rate input fields
+                var currencyRateCount = 1;
+
+                // Add currency rate input field dynamically
+                $('#addCurrencyRate').click(function () {
+                    currencyRateCount++;
+                    var newCurrencyRateField = `
+            <div class="mb-3 currency-rate">
+                <label for="rate${currencyRateCount}" class="form-label">Rate ${currencyRateCount}</label>
+                <input type="text" class="form-control" id="rate${currencyRateCount}" name="rates[${currencyRateCount - 1}][moneyCode]" placeholder="Money Code" required>
+                <input type="text" class="form-control mt-2" id="rateValue${currencyRateCount}" name="rates[${currencyRateCount - 1}][rate]" placeholder="Rate" required>
+            </div>
+        `;
+                    $('#currencyRates').append(newCurrencyRateField);
+                });
+            });
+            function setInsertUpdateValue(value) {
+        document.getElementById('controlInsertUpdate').value = value;
+    }
+        </script>
+
+        <%- include('partials/footer') %>

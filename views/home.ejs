@@ -1,0 +1,54 @@
+<%- include('partials/header') %>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var myModal = new bootstrap.Modal(document.getElementById('modalLogin'));
+            var openModalLink = document.getElementById('openModalLink');
+
+            openModalLink.addEventListener('click', function (event) {
+                event.preventDefault(); 
+                myModal.show(); 
+            });
+        });
+    </script>
+    <div class="container py-5 text-center">
+        <svg class="bi text-primary" width="80" height="80" viewBox="0 0 16 16" fill="currentColor">
+            <use xlink:href="#bootstrap"></use>
+        </svg>
+        <h1 class="display-4 fw-bold mt-3">Send Pay</h1>
+        <p class="col-lg-8 mx-auto fs-5 text-muted">Empowering Transactions</p>
+        <div class="d-inline-flex gap-2 mt-4">
+            <a id="openModalLink" class="btn btn-lg btn-primary" href="#" data-bs-toggle="modal" data-bs-target="#modalLogin">
+                <span class="glyphicon glyphicon-log-in me-2"></span> Login
+            </a>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="modalLogin" tabindex="-1" aria-labelledby="modalLoginLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLoginLabel">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Modal body content goes here --> 
+                    <form action="/" method="POST">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email address</label>
+                            <input type="email" class="form-control rounded-pill" id="email" placeholder="name@example.com">
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control rounded-pill" id="password" placeholder="Password">
+                        </div>  
+                        <button type="submit" class="w-100 btn btn-lg rounded-pill btn-primary">Login</button>                                          
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> 
+                </div>
+            </div>
+        </div>
+    </div>
+
+<%- include('partials/footer') %>
